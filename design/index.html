@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>お年寄りサービス</title>
+
+</head>
+<body>
+    <div class="container">
+        <h1>お困りですか？</h1>
+        <p>聞きたいことや、お願いしたいことを話すか、文字で入力してください。</p>
+
+        <div class="request-section">
+            <h2>依頼をする</h2>
+            <div class="button-group">
+                <button class="microphone-button" id="start-button">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1taWNyb3Bob25lIj48cGF0aCBkPSJNOSAyYy0xLjg0IDAtMy4yNyAxLjIzLTMuNyAzTDQgOWwtMS4yIDcuMUE3IDcgMCAwIDAgMTAuNSAxMy41TDEwIDIxIi8+PHBhdGggZD0iTTE1IDJjLTEuODQgMC0zLjI3IDEuMjMtMy43IDNMMCA5TDIwIDE2LjFBMS44OSA1LjU0IDAgMCAxIDE4IDE3LjVBNy4yMiA3LjIyIDAgMCAxIDUuNSA4LjVMNS41IDUuNEM5LjkgMi44IDIwIDIgMTcgNS41Ii8+PC9zdmc+" alt="マイクアイコン">
+                </button>
+                <input type="text" id="request-input" class="input-text" placeholder="例：電球を変えてほしい" />
+                <button class="submit-button" id="submit-request-button">家族に依頼する</button>
+            </div>
+            <div class="status-text" id="request-status-display">マイクのボタンを押すか、文字を入力してください</div>
+        </div>
+
+        <div class="status-section">
+            <h2>依頼状況の確認</h2>
+            <ul class="status-list" id="request-list">
+                </ul>
+        </div>
+        
+        <div class="family-section">
+            <h2>家族の情報登録</h2>
+            <form class="family-form" id="family-form">
+                <input type="text" id="family-name" placeholder="名前" required />
+                <input type="tel" id="family-contact" placeholder="電話番号（例: 090...）" required />
+                <button type="submit" class="register-button">家族を登録する</button>
+            </form>
+            <ul class="family-list-item" id="family-list">
+                </ul>
+        </div>
+
+    </div>
+
+ <!-- <script>
+        const startButton = document.getElementById('start-button');
+        const requestInput = document.getElementById('request-input');
+        const submitRequestButton = document.getElementById('submit-request-button');
+        const requestStatusDisplay = document.getElementById('request-status-display');
+        const familyForm = document.getElementById('family-form');
+        const familyNameInput = document.getElementById('family-name');
+        const familyContactInput = document.getElementById('family-contact');
+        const familyList = document.getElementById('family-list');
+        const requestList = document.getElementById('request-list');
+
+        let familyMembers = []; // 家族の情報を保存する配列
+        let requestCounter = 0; // 依頼のユニークID用
+        let requests = []; // 依頼の情報を保存する配列
+
+        // 家族登録フォームの送信処理
+        familyForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const newFamily = {
+                id: familyMembers.length,
+                name: familyNameInput.value,
+                contact: familyContactInput.value
+            };
+            familyMembers.push(newFamily);
+            alert(`${newFamily.name}さんの情報を登録しました。`);
+            familyNameInput.value = '';
+            familyContactInput.value = '';
+            renderFamilyList();
+        });
+
+        // 家族リストの表示
+        function renderFamilyList() {
+            familyList.innerHTML = '';
+            if (familyMembers.length === 0) {
+                familyList.textContent = '登録された家族はいません。';
+            } else {
+                familyMembers.forEach(member => {
+                    const li = document.createElement('li');
+                    li.textContent = `名前: ${member.name}, 連絡先: ${member.contact}`;
+                    familyList.appendChild(li);
+                });
+            }
+        }
+
+        // 依頼送信処理
+        submitRequestButton.addEventListener('click', () => {
+            const requestText = requestInput.value.trim();
+            if (requestText === '') {
+                requestStatusDisplay.textContent = '依頼内容を入力してください。';
+                return;
+            }
+
+            if (familyMembers.length === 0) {
+                requestStatusDisplay.textContent = '先に家族を登録してください。';
+                return;
+            }
+
+            requestCounter++;
+            const newRequest = {
+                id: requestCounter,
+                text: requestText,
+                status: '送信済み',
+                acceptedBy: null,
+                isCompleted: false
+            };
+            requests.unshift(newRequest); // 新しい依頼をリストの先頭に追加
+            
+            // 家族に通知するダミー処理
+            requestStatusDisplay.textContent = `「${requestText}」の依頼を家族に送信しました。`;
+            console.log('依頼データ:', newRequest);
+
+            renderRequestList();
+            requestInput.value = '';
+        });
+
+        // 依頼リストの表示
+        function renderRequestList() {
+            requestList.innerHTML = '';
+            if (requests.length === 0) {
+                requestList.textContent = '依頼はありません。';
+            } else {
+                requests.forEach(req => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <strong>依頼内容:</strong> ${req.text}<br>
+                        <strong>現在の状況:</strong> ${req.status}<br>
+                        ${req.acceptedBy ? `<strong>対応者:</strong> ${req.acceptedBy}` : ''}
+                    `;
+                    requestList.appendChild(li);
+                });
+            }
+        }
+        
+        // --- ここからWeb Speech APIの処理 ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'ja-JP';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            startButton.addEventListener('click', () => {
+                requestStatusDisplay.textContent = 'お話しください...';
+                recognition.start();
+            });
+
+            recognition.onresult = (event) => {
+                const speechResult = event.results[0][0].transcript;
+                requestInput.value = speechResult;
+                requestStatusDisplay.textContent = `「${speechResult}」と聞き取りました。`;
+            };
+
+            recognition.onend = () => {
+                if (requestInput.value) {
+                    requestStatusDisplay.textContent = `「${requestInput.value}」と聞き取りました。`;
+                }
+            };
+
+            recognition.onerror = (event) => {
+                requestStatusDisplay.textContent = 'ごめんなさい、うまく聞き取れませんでした。もう一度お願いします。';
+                console.error('認識エラー:', event.error);
+            };
+        } else {
+            requestStatusDisplay.textContent = 'お使いのブラウザは音声入力に対応していません。';
+            startButton.disabled = true;
+        }
+
+        // 初期表示
+        renderFamilyList();
+        renderRequestList();
+
+        // 依頼状況をシミュレーションするためのダミー処理
+        // 5秒後に依頼が了承されると仮定
+        setInterval(() => {
+            if (requests.length > 0) {
+                const latestRequest = requests[0];
+                if (latestRequest.status === '送信済み') {
+                    latestRequest.status = '了承済み';
+                    latestRequest.acceptedBy = familyMembers[0] ? familyMembers[0].name : '家族';
+                    renderRequestList();
+                    console.log('依頼が了承されました:', latestRequest);
+                } else if (latestRequest.status === '了承済み') {
+                    latestRequest.status = '完了';
+                    renderRequestList();
+                    console.log('依頼が完了しました:', latestRequest);
+                }
+            }
+        }, 5000);
+    </script> -->
+</body>
+</html>
