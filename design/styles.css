@@ -1,0 +1,106 @@
+div {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    background-color: #f0f0f0;
+    color: #236d1f;
+    padding: 20px;
+}
+
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.request {
+    background-color: (#f9f9f9);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.mic {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.input-text {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin-top: 10px;
+}
+
+.submit {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+}
+
+.family {
+    background-color: #000000;
+    color: #ffffff;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.request-item {
+    position: relative;
+    padding-right: 40px; /* Make space for the kebab menu */
+}
+
+.kebab-menu {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+}
+
+.kebab-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    padding: 0 5px;
+    cursor: pointer;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 30px; /* Position below the kebab button */
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 1;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-menu button {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+.dropdown-menu button:hover {
+    background-color: #f2f2f2;
+}
+
+.select {
+    width: 50%;
+    padding: 10px;
+    border: 1px solid #ccc;
+
+}

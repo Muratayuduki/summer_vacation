@@ -12,16 +12,17 @@
         <h1>お困りですか？</h1>
         <p>聞きたいことや、お願いしたいことを話すか、文字で入力してください。</p>
 
-        <div class="request-section">
+        <div class="request">
             <h2>依頼をする</h2>
-            <div class="button-group">
-                <button class="microphone-button" id="start-button">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1taWNyb3Bob25lIj48cGF0aCBkPSJNOSAyYy0xLjg0IDAtMy4yNyAxLjIzLTMuNyAzTDQgOWwtMS4yIDcuMUE3IDcgMCAwIDAgMTAuNSAxMy41TDEwIDIxIi8+PHBhdGggZD0iTTE1IDJjLTEuODQgMC0zLjI3IDEuMjMtMy43IDNMMCA5TDIwIDE2LjFBMS44OSA1LjU0IDAgMCAxIDE4IDE3LjVBNy4yMiA3LjIyIDAgMCAxIDUuNSA4LjVMNS41IDUuNEM5LjkgMi44IDIwIDIgMTcgNS41Ii8+PC9zdmc+" alt="マイクアイコン">
+            <div class="button">
+                <button class="mic" id="start-button">
+                    <img src="icon.png" alt="マイクのアイコン" width="24">
                 </button>
                 <input type="text" id="request-input" class="input-text" placeholder="例：電球を変えてほしい" />
-                <button class="submit-button" id="submit-request-button">家族に依頼する</button>
+                <select id="family-select" class="select"></select>
+                <button class="submit" id="request-button">依頼する</button>
             </div>
-            <div class="status-text" id="request-status-display">マイクのボタンを押すか、文字を入力してください</div>
+            <div>マイクのボタンを押すか、文字を入力してください</div>
         </div>
 
         <div class="status-section">
@@ -31,65 +32,60 @@
         </div>
         
         <div class="family-section">
-            <h2>家族の情報登録</h2>
-            <form class="family-form" id="family-form">
-                <input type="text" id="family-name" placeholder="名前" required />
-                <input type="tel" id="family-contact" placeholder="電話番号（例: 090...）" required />
-                <button type="submit" class="register-button">家族を登録する</button>
-            </form>
-            <ul class="family-list-item" id="family-list">
+            <h2>家族</h2>
+            <ul class="family" id="family-list">
                 </ul>
+            <a href="family.html">新しい家族を登録する</a>
         </div>
 
     </div>
 
- <!-- <script>
+     <script>
         const startButton = document.getElementById('start-button');
         const requestInput = document.getElementById('request-input');
-        const submitRequestButton = document.getElementById('submit-request-button');
+        const submitRequestButton = document.getElementById('request-button');
         const requestStatusDisplay = document.getElementById('request-status-display');
-        const familyForm = document.getElementById('family-form');
-        const familyNameInput = document.getElementById('family-name');
-        const familyContactInput = document.getElementById('family-contact');
         const familyList = document.getElementById('family-list');
         const requestList = document.getElementById('request-list');
+        const familySelect = document.getElementById('family-select');
 
-        let familyMembers = []; // 家族の情報を保存する配列
+        let familyMembers = JSON.parse(localStorage.getItem('familyMembers')) || []; // localStorageから読み込み
         let requestCounter = 0; // 依頼のユニークID用
         let requests = []; // 依頼の情報を保存する配列
-
-        // 家族登録フォームの送信処理
-        familyForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const newFamily = {
-                id: familyMembers.length,
-                name: familyNameInput.value,
-                contact: familyContactInput.value
-            };
-            familyMembers.push(newFamily);
-            alert(`${newFamily.name}さんの情報を登録しました。`);
-            familyNameInput.value = '';
-            familyContactInput.value = '';
-            renderFamilyList();
-        });
 
         // 家族リストの表示
         function renderFamilyList() {
             familyList.innerHTML = '';
+            familySelect.innerHTML = ''; // ドロップダウンもクリア
+
             if (familyMembers.length === 0) {
                 familyList.textContent = '登録された家族はいません。';
+                const defaultOption = document.createElement('option');
+                defaultOption.textContent = '家族がいません';
+                familySelect.appendChild(defaultOption);
+                familySelect.disabled = true;
             } else {
                 familyMembers.forEach(member => {
+                    // サイドバーのリスト
                     const li = document.createElement('li');
-                    li.textContent = `名前: ${member.name}, 連絡先: ${member.contact}`;
+                    li.textContent = member.name;
                     familyList.appendChild(li);
+
+                    // ドロップダウンのオプション
+                    const option = document.createElement('option');
+                    option.value = member.name;
+                    option.textContent = member.name;
+                    familySelect.appendChild(option);
                 });
+                familySelect.disabled = false;
             }
         }
 
         // 依頼送信処理
         submitRequestButton.addEventListener('click', () => {
             const requestText = requestInput.value.trim();
+            const selectedFamilyMember = familySelect.value;
+
             if (requestText === '') {
                 requestStatusDisplay.textContent = '依頼内容を入力してください。';
                 return;
@@ -106,12 +102,13 @@
                 text: requestText,
                 status: '送信済み',
                 acceptedBy: null,
-                isCompleted: false
+                isCompleted: false,
+                sentTo: selectedFamilyMember // 送信相手を記録
             };
             requests.unshift(newRequest); // 新しい依頼をリストの先頭に追加
             
             // 家族に通知するダミー処理
-            requestStatusDisplay.textContent = `「${requestText}」の依頼を家族に送信しました。`;
+            requestStatusDisplay.textContent = `「${requestText}」の依頼を${selectedFamilyMember}に送信しました。`;
             console.log('依頼データ:', newRequest);
 
             renderRequestList();
@@ -126,15 +123,49 @@
             } else {
                 requests.forEach(req => {
                     const li = document.createElement('li');
+                    li.classList.add('request-item');
                     li.innerHTML = `
                         <strong>依頼内容:</strong> ${req.text}<br>
                         <strong>現在の状況:</strong> ${req.status}<br>
                         ${req.acceptedBy ? `<strong>対応者:</strong> ${req.acceptedBy}` : ''}
+                        <div class="kebab-menu">
+                            <button class="kebab-button">&#8942;</button>
+                            <div class="dropdown-menu">
+                                <button class="delete-request-button" data-id="${req.id}">削除</button>
+                            </div>
+                        </div>
                     `;
                     requestList.appendChild(li);
                 });
             }
         }
+
+        // 依頼削除処理
+        requestList.addEventListener('click', (event) => {
+            if (event.target.classList.contains('kebab-button')) {
+                const dropdown = event.target.nextElementSibling;
+                // Close other dropdowns
+                document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                    if (menu !== dropdown) {
+                        menu.classList.remove('show');
+                    }
+                });
+                dropdown.classList.toggle('show');
+            } else if (event.target.classList.contains('delete-request-button')) {
+                const requestId = parseInt(event.target.dataset.id, 10);
+                requests = requests.filter(req => req.id !== requestId);
+                renderRequestList();
+            }
+        });
+
+        // Close dropdowns if clicking outside
+        window.addEventListener('click', (event) => {
+            if (!event.target.matches('.kebab-button')) {
+                document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
         
         // --- ここからWeb Speech APIの処理 ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -191,6 +222,6 @@
                 }
             }
         }, 5000);
-    </script> -->
+    </script> 
 </body>
 </html>

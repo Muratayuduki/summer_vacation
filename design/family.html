@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>家族の登録</title>
+</head>
+<body>
+    <div class="container">
+        <h1>家族の情報登録</h1>
+        <form class="family-form" id="family-form">
+            <input type="text" id="family-name" placeholder="名前" required />
+            <input type="tel" id="family-contact" placeholder="電話番号（例: 090...）" required />
+            <button type="submit" class="register-button">家族を登録する</button>
+        </form>
+        <h2>登録済みの家族</h2>
+        <ul class="family" id="family-list">
+            </ul>
+        <a href="index.html">依頼ページに戻る</a>
+    </div>
+
+    <script>
+        const familyForm = document.getElementById('family-form');
+        const familyNameInput = document.getElementById('family-name');
+        const familyContactInput = document.getElementById('family-contact');
+        const familyList = document.getElementById('family-list');
+
+        // localStorageから家族情報を読み込むか、新しい配列で初期化
+        let familyMembers = JSON.parse(localStorage.getItem('familyMembers')) || [];
+
+        // 家族登録フォームの送信処理
+        familyForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const newFamily = {
+                id: familyMembers.length,
+                name: familyNameInput.value,
+                contact: familyContactInput.value
+            };
+            familyMembers.push(newFamily);
+            // localStorageに保存
+            localStorage.setItem('familyMembers', JSON.stringify(familyMembers));
+            
+            alert(`${newFamily.name}さんの情報を登録しました。`);
+            familyNameInput.value = '';
+            familyContactInput.value = '';
+            renderFamilyList();
+        });
+
+        // 家族リストの表示
+        function renderFamilyList() {
+            familyList.innerHTML = '';
+            if (familyMembers.length === 0) {
+                familyList.textContent = '登録された家族はいません。';
+            } else {
+                familyMembers.forEach(member => {
+                    const li = document.createElement('li');
+                    li.textContent = `名前: ${member.name}, 連絡先: ${member.contact}`;
+                    familyList.appendChild(li);
+                });
+            }
+        }
+
+        // 初期表示
+        renderFamilyList();
+    </script>
+</body>
+</html>
