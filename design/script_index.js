@@ -12,14 +12,10 @@ let requests = []; // 依頼の情報を保存する配列
 
 // Fetch data from JSON files
 async function loadInitialData() {
-    try {
         const [familyRes, requestsRes] = await Promise.all([
             fetch('family.json'),
             fetch('requests.json')
         ]);
-
-        if (!familyRes.ok) throw new Error('family.jsonの読み込みに失敗しました。');
-        if (!requestsRes.ok) throw new Error('requests.jsonの読み込みに失敗しました。');
 
         familyMembers = await familyRes.json();
         requests = await requestsRes.json();
@@ -30,38 +26,17 @@ async function loadInitialData() {
 
         renderFamilyList();
         renderRequestList();
-    } catch (error) {
-        console.error(error);
-        requestStatusDisplay.textContent = 'データの読み込み中にエラーが発生しました。';
-    }
 }
 
 // 家族リストの表示
 function renderFamilyList() {
   familyList.innerHTML = "";
   familySelect.innerHTML = ""; // ドロップダウンもクリア
-
-  if (familyMembers.length === 0) {
-    familyList.textContent = "登録された家族はいません。";
-    const defaultOption = document.createElement("option");
-    defaultOption.textContent = "家族がいません";
-    familySelect.appendChild(defaultOption);
-    familySelect.disabled = true;
-  } else {
-    familyMembers.forEach((member) => {
-      // サイドバーのリスト
-      const li = document.createElement("li");
-      li.textContent = member.name;
-      familyList.appendChild(li);
-
-      // ドロップダウンのオプション
-      const option = document.createElement("option");
-      option.value = member.name;
-      option.textContent = member.name;
-      familySelect.appendChild(option);
-    });
-    familySelect.disabled = false;
-  }
+  familyList.textContent = "登録された家族はいません。";
+  const defaultOption = document.createElement("option");
+  defaultOption.textContent = "家族がいません";
+  familySelect.appendChild(defaultOption);
+  familySelect.disabled = true;
 }
 
 // 依頼送信処理
@@ -109,6 +84,7 @@ function renderRequestList() {
     requests.forEach((req) => {
       const li = document.createElement("li");
       li.classList.add("request-item");
+      //このhtmlはファイルを一つ作ってそれを読み込む
       li.innerHTML = `
                         <strong>依頼内容:</strong> ${req.text}<br>
                         <strong>現在の状況:</strong> ${req.status}<br>

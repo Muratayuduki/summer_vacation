@@ -10,3 +10,16 @@
     htmlとデザインの変更
     script未完成
     デザイン6割くらい
+    
+    8/6
+    大体のscriptの作成めっちゃエラーあり
+    html７割
+    デザイン6割
+    script5割
+    aws0割
+    
+
+    8/12
+    htmlとcss完成
+    script5割
+    awsアカウントだけ作成

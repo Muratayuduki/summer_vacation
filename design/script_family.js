@@ -8,9 +8,6 @@ let familyMembers = [];
 // Fetch family data from JSON
 async function loadFamilyData() {
         const response = await fetch('family.json');
-        if (!response.ok) {
-            throw new Error('family.jsonの読み込みに失敗しました。');
-        }
         familyMembers = await response.json();
         renderFamilyList();
 }
