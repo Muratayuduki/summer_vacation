@@ -7,7 +7,7 @@ let familyMembers = [];
 
 // Fetch family data from JSON
 async function loadFamilyData() {
-        const response = await fetch('family.json');
+        const response = await fetch('../json/family.json');
         familyMembers = await response.json();
         renderFamilyList();
 }

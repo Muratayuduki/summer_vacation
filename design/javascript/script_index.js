@@ -14,7 +14,7 @@ let requests = []; // 依頼の情報を保存する配列
 async function loadInitialData() {
         const [familyRes, requestsRes] = await Promise.all([
             fetch('family.json'),
-            fetch('requests.json')
+            fetch('../json/requests.json')
         ]);
 
         familyMembers = await familyRes.json();
