@@ -6,38 +6,84 @@ const familyList = document.getElementById("family-list");
 const requestList = document.getElementById("request-list");
 const familySelect = document.getElementById("family-select");
 
-let familyMembers = []; // localStorageから読み込み
-let requestCounter = 0; // 依頼のユニークID用
-let requests = []; // 依頼の情報を保存する配列
+let familyMembers = [];
+let requests = [];
+let requestCounter = 0;
 
-// Fetch data from JSON files
+// --- Cookie Helper Function ---
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for(let i=0;i < ca.length;i++) {
+        let c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+// --- Main Logic ---
+
 async function loadInitialData() {
-        const [familyRes, requestsRes] = await Promise.all([
-            fetch('family.json'),
-            fetch('../json/requests.json')
-        ]);
+    // Load family data from cookie first
+    const cookieData = getCookie("familyData");
+    if (cookieData) {
+        familyMembers = JSON.parse(cookieData);
+    } else {
+        // Fallback to JSON file if no cookie
+        try {
+            const familyRes = await fetch('../json/family.json');
+            familyMembers = await familyRes.json();
+        } catch (error) {
+            console.error('Could not load initial family data:', error);
+            familyMembers = [];
+        }
+    }
 
-        familyMembers = await familyRes.json();
+    // Load requests data from JSON
+    try {
+        const requestsRes = await fetch('../json/requests.json');
         requests = await requestsRes.json();
-
         if (requests.length > 0) {
             requestCounter = Math.max(...requests.map(r => r.id));
         }
+    } catch (error) {
+        console.error('Could not load requests data:', error);
+        requests = [];
+    }
 
-        renderFamilyList();
-        renderRequestList();
+    renderFamilyList();
+    renderRequestList();
 }
 
-// 家族リストの表示
 function renderFamilyList() {
-  familyList.innerHTML = "";
-  familySelect.innerHTML = ""; // ドロップダウンもクリア
-  familyList.textContent = "登録された家族はいません。";
-  const defaultOption = document.createElement("option");
-  defaultOption.textContent = "家族がいません";
-  familySelect.appendChild(defaultOption);
-  familySelect.disabled = true;
+    familyList.innerHTML = "";
+    familySelect.innerHTML = ""; // Clear dropdown
+
+    if (familyMembers.length === 0) {
+        familyList.textContent = "登録された家族はいません。";
+        const defaultOption = document.createElement("option");
+        defaultOption.textContent = "家族を登録してください";
+        familySelect.appendChild(defaultOption);
+        familySelect.disabled = true;
+    } else {
+        familyMembers.forEach(member => {
+            // Populate the dropdown
+            const option = document.createElement("option");
+            option.value = member.name;
+            option.textContent = member.name;
+            familySelect.appendChild(option);
+
+            // Populate the display list
+            const li = document.createElement("li");
+            li.textContent = `名前: ${member.name}`;
+            familyList.appendChild(li);
+        });
+        familySelect.disabled = false;
+    }
 }
+
+// The rest of the script remains largely the same...
 
 // 依頼送信処理
 submitRequestButton.addEventListener("click", () => {
@@ -65,11 +111,8 @@ submitRequestButton.addEventListener("click", () => {
   };
   requests.unshift(newRequest); // 新しい依頼をリストの先頭に追加
 
-  // 家族に通知するダミー処理
   requestStatusDisplay.textContent = `「${requestText}」の依頼を${selectedFamilyMember}に送信しました。`;
   console.log("依頼データ:", newRequest);
-  // ここではJSONファイルへの書き込みは行わない
-  console.log('Updated requests:', requests);
 
   renderRequestList();
   requestInput.value = "";
@@ -84,7 +127,6 @@ function renderRequestList() {
     requests.forEach((req) => {
       const li = document.createElement("li");
       li.classList.add("request-item");
-      //このhtmlはファイルを一つ作ってそれを読み込む
       li.innerHTML = `
                         <strong>依頼内容:</strong> ${req.text}<br>
                         <strong>現在の状況:</strong> ${req.status}<br>
@@ -111,7 +153,6 @@ function renderRequestList() {
 requestList.addEventListener("click", (event) => {
   if (event.target.classList.contains("kebab-button")) {
     const dropdown = event.target.nextElementSibling;
-    // Close other dropdowns
     document.querySelectorAll(".dropdown-menu.show").forEach((menu) => {
       if (menu !== dropdown) {
         menu.classList.remove("show");
@@ -121,8 +162,6 @@ requestList.addEventListener("click", (event) => {
   } else if (event.target.classList.contains("delete-request-button")) {
     const requestId = parseInt(event.target.dataset.id, 10);
     requests = requests.filter((req) => req.id !== requestId);
-    // ここではJSONファイルへの書き込みは行わない
-    console.log('Updated requests:', requests);
     renderRequestList();
   }
 });
@@ -136,7 +175,7 @@ window.addEventListener("click", (event) => {
   }
 });
 
-// --- ここからWeb Speech APIの処理 ---
+// --- Web Speech API ---
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
 if (SpeechRecognition) {
@@ -173,25 +212,5 @@ if (SpeechRecognition) {
   startButton.disabled = true;
 }
 
-// 初期表示
+// Initial load
 loadInitialData();
-
-// 依頼状況をシミュレーションするためのダミー処理
-// 5秒後に依頼が了承されると仮定
-setInterval(() => {
-  if (requests.length > 0) {
-    const latestRequest = requests[0];
-    if (latestRequest.status === "送信済み") {
-      latestRequest.status = "了承済み";
-      latestRequest.acceptedBy = familyMembers[0]
-        ? familyMembers[0].name
-        : "家族";
-      renderRequestList();
-      console.log("依頼が了承されました:", latestRequest);
-    } else if (latestRequest.status === "了承済み") {
-      latestRequest.status = "完了";
-      renderRequestList();
-      console.log("依頼が完了しました:", latestRequest);
-    }
-  }
-}, 5000);

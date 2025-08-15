@@ -5,14 +5,48 @@ const familyList = document.getElementById("family-list");
 
 let familyMembers = [];
 
-// Fetch family data from JSON
-async function loadFamilyData() {
-        const response = await fetch('../json/family.json');
-        familyMembers = await response.json();
-        renderFamilyList();
+// --- Cookie Helper Functions ---
+function setCookie(name, value, days) {
+    let expires = "";
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
 }
 
-// 家族登録フォームの送信処理
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for(let i=0;i < ca.length;i++) {
+        let c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+// --- Main Logic ---
+
+// Load data from Cookie, fallback to JSON file
+async function loadFamilyData() {
+    const cookieData = getCookie("familyData");
+    if (cookieData) {
+        familyMembers = JSON.parse(cookieData);
+    } else {
+        try {
+            const response = await fetch('../json/family.json');
+            familyMembers = await response.json();
+        } catch (error) {
+            console.error('Could not load initial family data:', error);
+            familyMembers = [];
+        }
+    }
+    renderFamilyList();
+}
+
+// Handle family registration form submission
 familyForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const newFamily = {
@@ -22,9 +56,7 @@ familyForm.addEventListener("submit", (event) => {
   };
   familyMembers.push(newFamily);
 
-  // ここではJSONファイルへの書き込みは行わず、配列を更新するだけ
-  // 将来的にAPIを呼び出す処理をここに実装します
-  console.log('Updated familyMembers:', familyMembers);
+  setCookie("familyData", JSON.stringify(familyMembers), 365); // Save to cookie for 1 year
 
   alert(`${newFamily.name}さんの情報を登録しました。`);
   familyNameInput.value = "";
@@ -32,7 +64,7 @@ familyForm.addEventListener("submit", (event) => {
   renderFamilyList();
 });
 
-// 家族リストの表示
+// Render the family list
 function renderFamilyList() {
   familyList.innerHTML = "";
   if (familyMembers.length === 0) {
@@ -53,15 +85,17 @@ function renderFamilyList() {
   }
 }
 
+// Handle family member deletion
 familyList.addEventListener("click", (event) => {
   if (event.target.classList.contains("delete-family-button")) {
     const familyId = parseInt(event.target.dataset.id, 10);
     familyMembers = familyMembers.filter((mem) => mem.id !== familyId);
-    // ここでもJSONファイルへの書き込みは行わない
-    console.log('Updated familyMembers:', familyMembers);
+    
+    setCookie("familyData", JSON.stringify(familyMembers), 365); // Update cookie after deletion
+
     renderFamilyList();
   }
 });
 
-// 初期表示
+// Initial load
 loadFamilyData();
