@@ -27,3 +27,8 @@
     8/15
     awsでサイトが起動するようになった
     これからは改善点を見つけなおしていきたい
+    登録した家族の情報をクッキーで保存する
+[cookie](https://zenn.dev/as_atushi/articles/e46520d974c5d0)  
+[AWS](https://ap-southeast-2.console.aws.amazon.com/console/home?region=ap-southeast-2#)  
+[AWS_Amplify](https://qiita.com/t_okkan/items/38aca98993bf06598af6)　  
+[マイク](https://saycon.co.jp/portal-for-newcomer/javaweb/webtips/web-speech-api)

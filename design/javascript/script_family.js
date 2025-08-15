@@ -35,17 +35,11 @@ async function loadFamilyData() {
     if (cookieData) {
         familyMembers = JSON.parse(cookieData);
     } else {
-        try {
             const response = await fetch('../json/family.json');
             familyMembers = await response.json();
-        } catch (error) {
-            console.error('Could not load initial family data:', error);
-            familyMembers = [];
-        }
-    }
     renderFamilyList();
 }
-
+}
 // Handle family registration form submission
 familyForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -56,7 +50,7 @@ familyForm.addEventListener("submit", (event) => {
   };
   familyMembers.push(newFamily);
 
-  setCookie("familyData", JSON.stringify(familyMembers), 365); // Save to cookie for 1 year
+  setCookie("familyData", JSON.stringify(familyMembers), 10000);
 
   alert(`${newFamily.name}さんの情報を登録しました。`);
   familyNameInput.value = "";
