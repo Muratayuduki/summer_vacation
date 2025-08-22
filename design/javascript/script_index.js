@@ -10,7 +10,17 @@ let familyMembers = [];
 let requests = [];
 let requestCounter = 0;
 
-// --- Cookie Helper Function ---
+// --- Cookie Helper Functions ---
+function setCookie(name, value, days) {
+    let expires = "";
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+
 function getCookie(name) {
     const nameEQ = name + "=";
     const ca = document.cookie.split(';');
@@ -40,16 +50,26 @@ async function loadInitialData() {
         }
     }
 
-    // Load requests data from JSON
-    try {
-        const requestsRes = await fetch('../json/requests.json');
-        requests = await requestsRes.json();
+    // Load requests data from cookie first
+    const requestsCookieData = getCookie("requestsData");
+    if (requestsCookieData) {
+        requests = JSON.parse(requestsCookieData);
         if (requests.length > 0) {
             requestCounter = Math.max(...requests.map(r => r.id));
         }
-    } catch (error) {
-        console.error('Could not load requests data:', error);
-        requests = [];
+    } else {
+        // Fallback to JSON file if no cookie
+        try {
+            const requestsRes = await fetch('../json/requests.json');
+            requests = await requestsRes.json();
+            if (requests.length > 0) {
+                requestCounter = Math.max(...requests.map(r => r.id));
+            }
+            setCookie("requestsData", JSON.stringify(requests), 365); // Save initial data to cookie
+        } catch (error) {
+            console.error('Could not load requests data:', error);
+            requests = [];
+        }
     }
 
     renderFamilyList();
@@ -110,6 +130,7 @@ submitRequestButton.addEventListener("click", () => {
     sentTo: selectedFamilyMember, // 送信相手を記録
   };
   requests.unshift(newRequest); // 新しい依頼をリストの先頭に追加
+  setCookie("requestsData", JSON.stringify(requests), 365); // Save to cookie
 
   requestStatusDisplay.textContent = `「${requestText}」の依頼を${selectedFamilyMember}に送信しました。`;
   console.log("依頼データ:", newRequest);
@@ -162,6 +183,7 @@ requestList.addEventListener("click", (event) => {
   } else if (event.target.classList.contains("delete-request-button")) {
     const requestId = parseInt(event.target.dataset.id, 10);
     requests = requests.filter((req) => req.id !== requestId);
+    setCookie("requestsData", JSON.stringify(requests), 365); // Save to cookie
     renderRequestList();
   }
 });

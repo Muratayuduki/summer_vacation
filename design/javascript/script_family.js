@@ -35,10 +35,15 @@ async function loadFamilyData() {
     if (cookieData) {
         familyMembers = JSON.parse(cookieData);
     } else {
+        try {
             const response = await fetch('../json/family.json');
             familyMembers = await response.json();
+        } catch (error) {
+            console.error('Could not load initial family data:', error);
+            familyMembers = [];
+        }
+    }
     renderFamilyList();
-}
 }
 // Handle family registration form submission
 familyForm.addEventListener("submit", (event) => {
